@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MiniMonitor</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="root">
+  <div id="shell">
+    <header id="bar" style="--wails-draggable:drag">
+      <span class="brand"><i></i><b>mini</b>monitor</span>
+      <nav style="--wails-draggable:no-drag">
+        <button id="bAdd" title="Add server">
+          <svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg></button>
+        <button id="bSize" title="Size">
+          <svg viewBox="0 0 16 16"><rect x="2.5" y="2.5" width="11" height="11" rx="2.5"/><rect x="5.5" y="5.5" width="5" height="5" rx="1.2"/></svg></button>
+        <button id="bSet" title="Settings">
+          <svg viewBox="0 0 16 16"><path d="M3 5h6M12 5h1M3 11h1M7 11h6"/><circle cx="10.5" cy="5" r="1.5"/><circle cx="5.5" cy="11" r="1.5"/></svg></button>
+        <button id="bPin" title="Always on top">
+          <svg viewBox="0 0 16 16"><path d="M6 2.5h4l-.5 4 2 2v1h-7v-1l2-2zM8 9.5V14"/></svg></button>
+        <button id="bMin" title="Minimize">
+          <svg viewBox="0 0 16 16"><path d="M4 8h8"/></svg></button>
+        <button id="bClose" title="Close">
+          <svg viewBox="0 0 16 16"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg></button>
+      </nav>
+    </header>
+    <main id="list"></main>
+    <div id="empty" hidden>
+      <button id="bAdd2"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg><span>Add server</span></button>
+    </div>
+  </div>
+
+  <!-- add / edit server -->
+  <section id="dlg" class="sheet" hidden>
+    <h3 id="dlgTitle">New server</h3>
+    <label>Name<input id="fName" placeholder="optional"></label>
+    <div class="row">
+      <label class="grow">Host<input id="fHost" dir="ltr" placeholder="1.2.3.4"></label>
+      <label class="port">Port<input id="fPort" dir="ltr" type="number" value="22"></label>
+    </div>
+    <label>User<input id="fUser" dir="ltr" value="root"></label>
+    <div class="seg" id="fAuth">
+      <button data-v="password" class="on">Password</button>
+      <button data-v="key">Key</button>
+    </div>
+    <label id="lPass">Password<input id="fPass" dir="ltr" type="password"></label>
+    <div id="lKey" hidden>
+      <label>Private key<textarea id="fKey" dir="ltr" rows="3" placeholder="-----BEGIN OPENSSH PRIVATE KEY-----"></textarea></label>
+      <div class="row">
+        <button class="ghost desk" id="fKeyFile">Choose file…</button>
+        <label class="grow">Passphrase<input id="fKeyPass" dir="ltr" type="password" placeholder="if any"></label>
+      </div>
+    </div>
+    <label>Interface<input id="fIface" dir="ltr" placeholder="auto (eth0 …)"></label>
+    <p id="dlgMsg"></p>
+    <div class="actions">
+      <button class="ghost" id="dTest">Test</button>
+      <span class="sp"></span>
+      <button class="ghost" id="dCancel">Cancel</button>
+      <button class="primary" id="dSave">Save</button>
+    </div>
+  </section>
+
+  <!-- settings -->
+  <section id="set" class="sheet" hidden>
+    <h3>Settings</h3>
+    <div class="grid">
+      <span>Default size</span>
+      <div class="seg" id="sSize"><button data-v="s">S</button><button data-v="m">M</button><button data-v="l">L</button></div>
+      <span>Scale S</span><input type="range" id="sScaleS" min="0.6" max="2" step="0.05">
+      <span>Scale M</span><input type="range" id="sScaleM" min="0.6" max="2" step="0.05">
+      <span>Scale L</span><input type="range" id="sScaleL" min="0.6" max="2" step="0.05">
+      <span>Opacity</span><input type="range" id="sOpacity" min="0.3" max="1" step="0.02">
+      <span>Chart span (s)</span><input type="number" id="sHistory" min="10" max="600" dir="ltr">
+      <span>Interval (s)</span><input type="number" id="sInterval" min="1" max="60" dir="ltr">
+      <span>Speed unit</span>
+      <div class="seg" id="sBits"><button data-v="1">Mbps</button><button data-v="0">MB/s</button></div>
+      <span class="desk">Always on top</span><input class="desk" type="checkbox" id="sOnTop">
+      <span>Show title</span><input type="checkbox" id="sShowTitle">
+      <span>Colors</span>
+      <div class="colors">
+        <input type="color" id="sRx" title="Download"><input type="color" id="sTx" title="Upload">
+        <input type="color" id="sCpu" title="CPU"><input type="color" id="sRam" title="RAM">
+        <input type="color" id="sBg" title="Background">
+      </div>
+    </div>
+    <div class="actions">
+      <small id="ver"></small><span class="sp"></span>
+      <button class="primary" id="sDone">Done</button>
+    </div>
+  </section>
+
+  <div id="menu" hidden></div>
+</div>
+<script src="bridge.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

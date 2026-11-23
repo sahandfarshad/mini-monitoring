@@ -1,0 +1,48 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+
+def ks = System.getenv('KEYSTORE_FILE')
+
+android {
+    namespace 'com.sahandfarshad.minimonitor'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.sahandfarshad.minimonitor'
+        minSdk 21
+        targetSdk 34
+        versionCode((System.getenv('VERSION_CODE') ?: '1') as int)
+        versionName System.getenv('VERSION_NAME') ?: '0.0.0'
+    }
+
+    signingConfigs {
+        release {
+            // A private keystore from repo secrets when present, otherwise the
+            // shared one in the repo (stable signature so updates install over).
+            storeFile ks ? file(ks) : file('shared.jks')
+            storePassword ks ? System.getenv('KEYSTORE_PASSWORD') : 'android'
+            keyAlias System.getenv('KEY_ALIAS') ?: 'minimon'
+            keyPassword ks ? System.getenv('KEYSTORE_PASSWORD') : 'android'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions { jvmTarget = '17' }
+    buildFeatures { buildConfig true }
+}
+
+dependencies {
+    implementation files('libs/minimon.aar')
+}
