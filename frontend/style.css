@@ -27,7 +27,15 @@ svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.4;stroke
 #bar nav button{width:20px;height:18px;display:grid;place-items:center;border-radius:6px;color:var(--mut)}
 #bar nav button:hover{background:rgba(255,255,255,.07);color:var(--fg)}
 #bar nav button svg{width:12px;height:12px}
-#bPin.on{color:var(--fg)}
+#bar nav button.txt{display:flex;align-items:center;width:auto;padding:0 6px;font-size:10px;font-weight:600;letter-spacing:.03em;color:var(--mut);white-space:nowrap}
+#bar nav button.txt em{font-style:normal;color:var(--fg);opacity:.85;margin-left:2px}
+#bPin .pin-on{display:none}
+#bPin.on .pin-on{display:block}
+#bPin.on .pin-off{display:none}
+#bPin.on{color:var(--rx);background:rgba(255,255,255,.06)}
+#bPin .fill{fill:currentColor}
+/* keep the pin visible when it is on, so the state shows without hover */
+#bar nav #bPin.on{opacity:1}
 #bClose:hover{background:#e5484d!important;color:#fff!important}
 body.notitle #bar{height:8px}
 body.notitle #bar .brand{display:none}
@@ -173,3 +181,5 @@ html.mobile,html.mobile body{background:var(--bg);overflow:auto;height:auto}
 .mobile #menu{font-size:15px;min-width:200px}
 .mobile #menu button{padding:10px 12px}
 .mobile body.notitle #bar,.mobile.notitle #bar{height:52px}
+
+.mobile #bar nav button.txt{font-size:13px;padding:0 10px}

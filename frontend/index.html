@@ -14,12 +14,12 @@
       <nav style="--wails-draggable:no-drag">
         <button id="bAdd" title="Add server">
           <svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg></button>
-        <button id="bSize" title="Size">
-          <svg viewBox="0 0 16 16"><rect x="2.5" y="2.5" width="11" height="11" rx="2.5"/><rect x="5.5" y="5.5" width="5" height="5" rx="1.2"/></svg></button>
+        <button id="bSize" class="txt" title="Change size (S / M / L)">Size <em id="bSizeV">M</em></button>
         <button id="bSet" title="Settings">
           <svg viewBox="0 0 16 16"><path d="M3 5h6M12 5h1M3 11h1M7 11h6"/><circle cx="10.5" cy="5" r="1.5"/><circle cx="5.5" cy="11" r="1.5"/></svg></button>
         <button id="bPin" title="Always on top">
-          <svg viewBox="0 0 16 16"><path d="M6 2.5h4l-.5 4 2 2v1h-7v-1l2-2zM8 9.5V14"/></svg></button>
+          <svg class="pin-on" viewBox="0 0 16 16"><path class="fill" d="M6 2.5h4l-.5 4 2 2v1h-7v-1l2-2z"/><path d="M8 9.5V14"/></svg>
+          <svg class="pin-off" viewBox="0 0 16 16"><path d="M6 2.5h4l-.5 4 2 2v1h-7v-1l2-2zM8 9.5V14M2.5 2.5l11 11"/></svg></button>
         <button id="bMin" title="Minimize">
           <svg viewBox="0 0 16 16"><path d="M4 8h8"/></svg></button>
         <button id="bClose" title="Close">

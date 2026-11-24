@@ -33,6 +33,8 @@ function applyUI() {
   r.setProperty("--cpu", ui.cpuColor); r.setProperty("--ram", ui.ramColor);
   document.body.classList.toggle("notitle", !ui.showTitle);
   $("#bPin").classList.toggle("on", ui.onTop);
+  $("#bPin").title = ui.onTop ? "Always on top: ON (click to let other windows cover it)" : "Always on top: OFF (click to keep it above other windows)";
+  $("#bSizeV").textContent = (ui.size || "m").toUpperCase();
 }
 const sizeOf = s => s.size || ui.size || "m";
 const scaleOf = z => ({ s: ui.scaleS, m: ui.scaleM, l: ui.scaleL }[z] || 1);
@@ -122,6 +124,40 @@ function draw(id) {
   path("rx"); g.strokeStyle = rx; g.lineWidth = 1.3; g.lineJoin = "round"; g.stroke();
   // upload: thin line
   path("tx"); g.strokeStyle = tx; g.lineWidth = 1.1; g.stroke();
+  axes(g, w, h, top, Y, n);
+}
+
+/* ---------- chart axes ---------- */
+function niceStep(raw) {
+  const p = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / p;
+  return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * p;
+}
+function axisLabel(v, i) {
+  const u = ui.bits ? ["b", "K", "M", "G"] : ["B", "K", "M", "G"];
+  return (v >= 10 || v === 0 ? Math.round(v) : +v.toFixed(1)) + u[i];
+}
+function axes(g, w, h, top, Y, n) {
+  const mul = ui.bits ? 8 : 1, base = ui.bits ? 1000 : 1024;
+  let i = 0, v = top * mul; while (v >= base && i < 3) { v /= base; i++; }
+  const lines = h >= 40 ? 3 : 2, step = niceStep(v / lines), unit = Math.pow(base, i) / mul;
+  const labels = h >= 30, fs = 8;
+  g.font = `600 ${fs}px "Segoe UI", system-ui, sans-serif`;
+  // horizontal grid + value labels (right edge)
+  g.textAlign = "right"; g.textBaseline = "bottom";
+  for (let k = 1; k * step < v * 0.97; k++) {
+    const y = Math.round(Y(k * step * unit)) + 0.5;
+    g.strokeStyle = "rgba(255,255,255,0.07)"; g.lineWidth = 1; g.setLineDash([2, 3]);
+    g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); g.setLineDash([]);
+    if (labels && y > fs + 2) { g.fillStyle = "rgba(255,255,255,0.38)"; g.fillText(axisLabel(k * step, i), w - 3, y - 1); }
+  }
+  // vertical time ticks (bottom), every quarter of the span
+  const span = ui.history, tstep = niceStep(span / 4);
+  g.textAlign = "center"; g.textBaseline = "bottom";
+  for (let s = tstep; s < span; s += tstep) {
+    const x = Math.round(w - (s / span) * w) + 0.5;
+    g.strokeStyle = "rgba(255,255,255,0.05)"; g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke();
+    if (labels && x > 14) { g.fillStyle = "rgba(255,255,255,0.3)"; g.fillText((s >= 60 && s % 60 === 0 ? s / 60 + "m" : s + "s"), x, h - 1); }
+  }
 }
 
 /* ---------- window fitting ---------- */
