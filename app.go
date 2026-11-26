@@ -56,11 +56,11 @@ func (a *App) trackPosition() {
 }
 
 func (a *App) beforeClose(ctx context.Context) bool { a.savePos(); return false }
-func (a *App) shutdown(ctx context.Context)          { a.c.StopAll() }
+func (a *App) shutdown(ctx context.Context)         { a.c.StopAll() }
 
 // ---- bound methods ----
 
-func (a *App) GetState() core.State                 { return a.c.GetState("windows") }
+func (a *App) GetState() core.State                  { return a.c.GetState("windows") }
 func (a *App) TestServer(in core.ServerInput) string { return a.c.TestServer(in) }
 func (a *App) SaveServer(in core.ServerInput) string { return a.c.SaveServer(in) }
 func (a *App) DeleteServer(id string)                { a.c.DeleteServer(id) }

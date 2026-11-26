@@ -12,6 +12,35 @@ const on = (ev, fn) => (PREVIEW ? mockOn(ev, fn) : window.runtime.EventsOn(ev, f
 let ui = {}, servers = [], statuses = {}, hist = {}, last = {}, tiles = {}, peak = {};
 let editing = null, auth = "password";
 
+/* ---------- language ---------- */
+let L = "en";
+const T = (k, v = {}) => ((I18N[L] && I18N[L][k]) || I18N.en[k] || k).replace(/\{(\w+)\}/g, (_, n) => v[n] ?? "");
+function applyLang() {
+  const meta = LANGS.find(x => x[0] === L) || LANGS[0];
+  const de = document.documentElement; de.lang = L; de.dir = meta[3] ? "rtl" : "ltr";
+  document.querySelectorAll("[data-t]").forEach(e => e.textContent = T(e.dataset.t));
+  document.querySelectorAll("[data-tp]").forEach(e => e.placeholder = T(e.dataset.tp));
+  document.querySelectorAll("[data-tt]").forEach(e => e.title = T(e.dataset.tt));
+  $("#sLangCur").textContent = meta[1];
+  document.querySelectorAll(".langlist button").forEach(b => b.classList.toggle("on", b.dataset.l === L));
+}
+function setLang(l) {
+  L = I18N[l] ? l : "en"; ui.lang = L;
+  applyLang(); applyUI(); render();
+  clearTimeout(saveT); saveT = setTimeout(() => api.SaveUI(ui), 250);
+}
+(function buildLangList() {
+  const list = $(".langlist");
+  for (const [c, nat, eng] of LANGS) {
+    const b = document.createElement("button"); b.type = "button"; b.dataset.l = c; b.setAttribute("role", "option");
+    b.innerHTML = "<b></b><small></small>"; b.firstChild.textContent = nat; b.lastChild.textContent = eng;
+    b.lang = c; b.onclick = () => { setLang(c); toggleLang(false); };
+    list.appendChild(b);
+  }
+  $("#sLang").onclick = () => toggleLang($("#langPop").hidden);
+})();
+function toggleLang(v) { $("#langPop").hidden = !v; $("#sLang").classList.toggle("open", v); fit(); }
+
 /* ---------- formatting ---------- */
 function fmtSpeed(bps) {
   if (ui.bits) {
@@ -33,7 +62,7 @@ function applyUI() {
   r.setProperty("--cpu", ui.cpuColor); r.setProperty("--ram", ui.ramColor);
   document.body.classList.toggle("notitle", !ui.showTitle);
   $("#bPin").classList.toggle("on", ui.onTop);
-  $("#bPin").title = ui.onTop ? "Always on top: ON (click to let other windows cover it)" : "Always on top: OFF (click to keep it above other windows)";
+  $("#bPin").title = T(ui.onTop ? "pinOn" : "pinOff");
   $("#bSizeV").textContent = (ui.size || "m").toUpperCase();
 }
 const sizeOf = s => s.size || ui.size || "m";
@@ -50,7 +79,7 @@ function render() {
     el.style.setProperty("--k", scaleOf(z));
     el.innerHTML = `
       <div class="hd"><span class="dot"></span><span class="name"></span><span class="msg"></span></div>
-      <div class="body">
+      <div class="body" dir="ltr">
         <div class="chart"><div class="cv"><canvas></canvas></div><div class="spd"><span class="d">–</span><span class="u">–</span></div></div>
         <div class="sq cpu"><i class="fill"></i><span class="v">–</span><span class="l">cpu</span></div>
         <div class="sq ram"><i class="fill"></i><span class="v">–</span><span class="l">ram</span><span class="x"></span></div>
@@ -77,8 +106,8 @@ function paintStatus(id) {
   t.msg.textContent = "";
   if (st.state === "error") {
     if (st.msg === "HOSTKEY_CHANGED") {
-      t.msg.textContent = "host key changed";
-      const b = document.createElement("button"); b.textContent = "trust";
+      t.msg.textContent = T("hostKey");
+      const b = document.createElement("button"); b.textContent = T("trust");
       b.onclick = () => api.TrustNewHostKey(id); t.msg.appendChild(b);
     } else t.msg.textContent = shortErr(st.msg);
     t.msg.title = st.msg || "";
@@ -86,10 +115,10 @@ function paintStatus(id) {
   }
 }
 function shortErr(m = "") {
-  if (/unable to authenticate|no supported methods/i.test(m)) return "auth failed";
-  if (/timeout|i\/o timeout/i.test(m)) return "timeout";
-  if (/refused/i.test(m)) return "refused";
-  if (/no such host/i.test(m)) return "bad host";
+  if (/unable to authenticate|no supported methods/i.test(m)) return T("authFail");
+  if (/timeout|i\/o timeout/i.test(m)) return T("timeout");
+  if (/refused/i.test(m)) return T("refused");
+  if (/no such host/i.test(m)) return T("badHost");
   return m.length > 40 ? m.slice(0, 40) + "…" : m;
 }
 
@@ -187,16 +216,16 @@ function openMenu(s, x, y) {
   const m = $("#menu"), z = s.size || "";
   const item = (txt, fn, cls = "") => `<button class="${cls}" data-a="${fn}">${txt}</button>`;
   m.innerHTML =
-    item("Edit", "edit") +
+    item(T("edit"), "edit") +
     "<hr>" +
-    item("Size: default", "z:", z === "" ? "on" : "") +
-    item("Size: small", "z:s", z === "s" ? "on" : "") +
-    item("Size: medium", "z:m", z === "m" ? "on" : "") +
-    item("Size: large", "z:l", z === "l" ? "on" : "") +
+    item(T("sizeDef"), "z:", z === "" ? "on" : "") +
+    item(T("sizeS"), "z:s", z === "s" ? "on" : "") +
+    item(T("sizeM"), "z:m", z === "m" ? "on" : "") +
+    item(T("sizeL"), "z:l", z === "l" ? "on" : "") +
     "<hr>" +
-    item("Move up", "up") + item("Move down", "down") +
-    item(s.disabled ? "Resume" : "Pause", "toggle") +
-    "<hr>" + item("Delete", "del", "danger");
+    item(T("up"), "up") + item(T("down"), "down") +
+    item(T(s.disabled ? "resume" : "pause"), "toggle") +
+    "<hr>" + item(T("del"), "del", "danger");
   m.hidden = false;
   m.style.left = "0px"; m.style.top = "0px";
   const r = m.getBoundingClientRect();
@@ -210,7 +239,7 @@ function openMenu(s, x, y) {
     if (a === "up") await api.MoveServer(s.id, -1);
     if (a === "down") await api.MoveServer(s.id, 1);
     if (a === "toggle") await api.ToggleServer(s.id);
-    if (a === "del") { if (!confirm("Delete " + s.name + "?")) return; await api.DeleteServer(s.id); delete hist[s.id]; }
+    if (a === "del") { if (!confirm(T("delQ", { name: s.name }))) return; await api.DeleteServer(s.id); delete hist[s.id]; }
     await reload();
   };
   fit();
@@ -228,11 +257,11 @@ function setAuth(v) {
 $("#fAuth").onclick = e => { const b = e.target.closest("button"); if (b) setAuth(b.dataset.v); };
 function openDialog(s) {
   closeSheets(); editing = s || null;
-  $("#dlgTitle").textContent = s ? "Edit server" : "New server";
+  $("#dlgTitle").textContent = T(s ? "editServer" : "newServer");
   $("#fName").value = s?.name || ""; $("#fHost").value = s?.host || "";
   $("#fPort").value = s?.port || 22; $("#fUser").value = s?.user || "root";
   $("#fPass").value = ""; $("#fKey").value = ""; $("#fKeyPass").value = ""; $("#fIface").value = s?.iface || "";
-  $("#fPass").placeholder = $("#fKey").placeholder = s?.hasSecret ? "unchanged" : "";
+  $("#fPass").placeholder = $("#fKey").placeholder = s?.hasSecret ? T("unchanged") : "";
   setAuth(s?.auth || "password"); msg("");
   $("#dlg").hidden = false; sheeting(true); if (!MOBILE) $("#fHost").focus();
 }
@@ -244,9 +273,9 @@ function input() {
 function msg(t, cls = "") { const m = $("#dlgMsg"); m.textContent = t; m.className = cls; fit(); }
 $("#fKeyFile").onclick = async () => { const k = await api.PickKeyFile(); if (k) $("#fKey").value = k; };
 $("#dTest").onclick = async () => {
-  msg("Connecting…");
+  msg(T("connecting"));
   const r = await api.TestServer(input());
-  r.startsWith("OK") ? msg("✓ Connected  " + r.slice(3), "good") : msg(r, "bad");
+  r.startsWith("OK") ? msg("✓ " + T("connected") + "  " + r.slice(3), "good") : msg(r, "bad");
 };
 $("#dSave").onclick = async () => {
   const r = await api.SaveServer(input());
@@ -283,7 +312,7 @@ $("#sSize").onclick = e => { const b = e.target.closest("button"); if (!b) retur
 $("#sBits").onclick = e => { const b = e.target.closest("button"); if (!b) return; ui.bits = b.dataset.v === "1"; segSet("#sBits", b.dataset.v); saveUI(true); };
 $("#sDone").onclick = () => closeSheets();
 function sheeting(v) { document.body.classList.toggle("sheeting", v); window.scrollTo(0, 0); fit(); }
-function closeSheets() { $("#set").hidden = true; $("#dlg").hidden = true; sheeting(false); }
+function closeSheets() { toggleLang(false); $("#set").hidden = true; $("#dlg").hidden = true; sheeting(false); }
 
 /* ---------- top bar ---------- */
 $("#bAdd").onclick = $("#bAdd2").onclick = () => openDialog(null);
@@ -297,6 +326,7 @@ $("#bClose").onclick = () => api.Quit();
 async function reload() {
   const st = await api.GetState();
   ui = st.ui; servers = st.servers || [];
+  L = I18N[ui.lang] ? ui.lang : "en"; ui.lang = L; applyLang();
   for (const x of st.statuses || []) statuses[x.id] = x;
   $("#ver").textContent = "v" + st.version;
   applyUI(); render();

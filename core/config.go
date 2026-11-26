@@ -27,14 +27,14 @@ type Server struct {
 
 // UI holds every adjustable look-and-feel setting.
 type UI struct {
-	Size      string  `json:"size"`      // s | m | l
-	ScaleS    float64 `json:"scaleS"`    // multipliers per size
+	Size      string  `json:"size"`   // s | m | l
+	ScaleS    float64 `json:"scaleS"` // multipliers per size
 	ScaleM    float64 `json:"scaleM"`
 	ScaleL    float64 `json:"scaleL"`
-	Opacity   float64 `json:"opacity"`   // 0.3 .. 1
-	History   int     `json:"history"`   // seconds shown in chart
-	Interval  int     `json:"interval"`  // seconds between samples
-	Bits      bool    `json:"bits"`      // show Mbit/s instead of MB/s
+	Opacity   float64 `json:"opacity"`  // 0.3 .. 1
+	History   int     `json:"history"`  // seconds shown in chart
+	Interval  int     `json:"interval"` // seconds between samples
+	Bits      bool    `json:"bits"`     // show Mbit/s instead of MB/s
 	OnTop     bool    `json:"onTop"`
 	RxColor   string  `json:"rxColor"`
 	TxColor   string  `json:"txColor"`
@@ -42,6 +42,7 @@ type UI struct {
 	RAMColor  string  `json:"ramColor"`
 	BgColor   string  `json:"bgColor"`
 	ShowTitle bool    `json:"showTitle"`
+	Lang      string  `json:"lang"` // UI language code, default en
 	WinX      int     `json:"winX"`
 	WinY      int     `json:"winY"`
 	WinW      int     `json:"winW"`
